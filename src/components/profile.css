@@ -1,0 +1,205 @@
+/* profile.css */
+
+.hover-effect:hover {
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+}
+
+/* Cambia il colore al passaggio del mouse bottoni */
+.btn-primary {
+  background-color: #2f7c74 !important;
+  border-color: #2f7c74 !important;
+}
+
+.btn-primary:hover {
+  background-color: #76f464 !important;
+  border-color: #76f464 !important;
+}
+
+.custom-modal {
+  max-width: 70%;
+  margin: 1.75rem auto;
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.card-body {
+  flex: 1;
+}
+
+.card-title,
+.card-text {
+  margin-bottom: 0.5rem;
+}
+
+.card-footer {
+  text-align: center;
+  padding-top: 10px;
+  padding-bottom: 10px;
+  background-color: #f8f9fa;
+  border-top: 1px solid rgba(0, 0, 0, 0.125);
+}
+
+/* Icona della penna per la copertina */
+.edit-icon {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: white;
+  border-radius: 50%;
+  padding: 5px;
+  cursor: pointer;
+  font-size: 20px;
+}
+
+/* Icona della penna per l'immagine profilo */
+.edit-icon-profile {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  background: white;
+  border-radius: 50%;
+  padding: 5px;
+  cursor: pointer;
+  font-size: 20px;
+}
+
+/* Media Queries */
+@media (max-width: 768px) {
+  .edit-icon {
+    font-size: 16px;
+    top: 5px;
+    right: 5px;
+  }
+
+  .edit-icon-profile {
+    font-size: 16px;
+    bottom: 5px;
+    right: 5px;
+  }
+}
+
+@media (max-width: 576px) {
+  .edit-icon {
+    font-size: 14px;
+    top: 5px;
+    right: 5px;
+  }
+
+  .edit-icon-profile {
+    font-size: 14px;
+    bottom: 5px;
+    right: 5px;
+  }
+}
+
+.edit-icon-cover {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: white;
+  border-radius: 50%;
+  padding: 5px;
+  cursor: pointer;
+  font-size: 20px;
+}
+
+.edit-icon-profile {
+  position: absolute;
+  bottom: 10px;
+  right: 10px;
+  background: white;
+  border-radius: 50%;
+  padding: 5px;
+  cursor: pointer;
+  font-size: 20px;
+}
+
+@media (max-width: 768px) {
+  .edit-icon-cover {
+    top: 5px;
+    right: 5px;
+    font-size: 16px;
+  }
+
+  .edit-icon-profile {
+    bottom: 10px;
+    right: 10px;
+    font-size: 16px;
+  }
+}
+
+@media (max-width: 425px) {
+  .edit-icon-cover {
+    top: 5px;
+    right: 5px;
+    font-size: 14px;
+  }
+
+  .edit-icon-profile {
+    bottom: 10px;
+    right: 5px;
+    font-size: 14px;
+  }
+}
+
+@media (max-width: 375px) {
+  .edit-icon-cover {
+    top: 5px;
+    right: 5px;
+    font-size: 12px;
+  }
+
+  .edit-icon-profile {
+    bottom: 10px;
+    right: 5px;
+    font-size: 12px;
+  }
+}
+
+@media (max-width: 320px) {
+  .edit-icon-cover {
+    top: 5px;
+    right: 5px;
+    font-size: 10px;
+  }
+
+  .edit-icon-profile {
+    bottom: 10px;
+    right: 5px;
+    font-size: 10px;
+  }
+}
+
+.cover-image {
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+}
+
+.profile-image {
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.column {
+  text-align: center;
+}
+
+.number {
+  font-size: 1.8rem;
+  color: #2f7c74;
+  margin-bottom: 5px;
+}
+
+.label {
+  font-size: 1rem;
+  color: #6c757d;
+  text-transform: uppercase;
+}
+
+.card-img-top {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+}

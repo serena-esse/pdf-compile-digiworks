@@ -1,0 +1,83 @@
+[30-Jan-2025 12:12:24 Europe/Berlin] 🔵 JSON ricevuto: Array
+(
+    [nome] => Officia qui mollitia
+    [cognome] => Mcfadden
+    [ragione_sociale] => Atque placeat magna
+    [data_nascita] => 1996-05-11
+    [email] => wytaq@mailinator.com
+    [telefono] => +1 (449) 549-4459
+    [indirizzo] => Voluptas consectetur
+    [località] => Saepe tempor aliqua
+    [Provincia] => Aliquid laborum Fug
+    [cap] => Consequuntur dolorem
+    [codice_fiscale] => Voluptatum dignissim
+    [luogo_di_nascita] => Ea voluptas mollitia
+    [numero_carta_identita] => Similique ex accusan
+    [rilasciato_da] => Vel sed molestiae po
+    [sdi_pec] => Omnis aut ad eaque d
+    [numero_da_migrare1] => Magna dicta laudanti
+    [codice_di_migrazione1] => Eum officia est aut 
+    [Operatore_Cedente1] => Sit est qui eaque 
+    [Tipologia1] => Illum esse non ut 
+    [numero_da_migrare2] => Aute ex sed id aut u
+    [codice_di_migrazione2] => Quasi sed maxime sun
+    [Operatore_Cedente2] => Aute qui harum inven
+    [Tipologia2] => Qui consequatur even
+    [numero_da_migrare3] => Quod quis lorem et q
+    [codice_di_migrazione3] => Minus commodo in cum
+    [Operatore_Cedente3] => Eum perferendis moll
+    [Tipologia3] => Ad sunt rerum sed n
+    [note] => Nam nisi quos qui ma
+    [n_revoip1000] => 91
+    [n_revoipchagg] => 12
+    [costo_attivazione] => 41
+    [canone_mensile] => 69
+    [data_pratica] => 2022-12-28
+    [luogo_pratica] => In minus excepturi v
+)
+
+[30-Jan-2025 12:12:24 Europe/Berlin] 🔵 Stringa tipi: sssssssssssssssssssssssssssssiidd
+[30-Jan-2025 12:12:24 Europe/Berlin] 🔵 Numero parametri: 34
+[30-Jan-2025 12:12:24 Europe/Berlin] 🔵 Parametri: Array
+(
+    [0] => Officia qui mollitia
+    [1] => Mcfadden
+    [2] => 1996-05-11
+    [3] => Voluptas consectetur
+    [4] => Voluptatum dignissim
+    [5] => wytaq@mailinator.com
+    [6] => +1 (449) 549-4459
+    [7] => Saepe tempor aliqua
+    [8] => Aliquid laborum Fug
+    [9] => Ea voluptas mollitia
+    [10] => Consequuntur dolorem
+    [11] => 2022-12-28
+    [12] => Atque placeat magna
+    [13] => Omnis aut ad eaque d
+    [14] => Similique ex accusan
+    [15] => Magna dicta laudanti
+    [16] => Eum officia est aut 
+    [17] => Sit est qui eaque 
+    [18] => 
+    [19] => Aute ex sed id aut u
+    [20] => Quasi sed maxime sun
+    [21] => Aute qui harum inven
+    [22] => 
+    [23] => Quod quis lorem et q
+    [24] => Minus commodo in cum
+    [25] => Eum perferendis moll
+    [26] => 
+    [27] => Nam nisi quos qui ma
+    [28] => In minus excepturi v
+    [29] => Vel sed molestiae po
+    [30] => 91
+    [31] => 12
+    [32] => 41
+    [33] => 69
+)
+
+[30-Jan-2025 12:12:24 Europe/Berlin] PHP Fatal error:  Uncaught ArgumentCountError: The number of elements in the type definition string must match the number of bind variables in C:\xampp\htdocs\ictddzr805-main\ictddzr805-php-main\api\save_client.php:103
+Stack trace:
+#0 C:\xampp\htdocs\ictddzr805-main\ictddzr805-php-main\api\save_client.php(103): mysqli_stmt->bind_param('sssssssssssssss...', 'Officia qui mol...', 'Mcfadden', '1996-05-11', 'Voluptas consec...', 'Voluptatum dign...', 'wytaq@mailinato...', '+1 (449) 549-44...', 'Saepe tempor al...', 'Aliquid laborum...', 'Ea voluptas mol...', 'Consequuntur do...', '2022-12-28', 'Atque placeat m...', 'Omnis aut ad ea...', 'Similique ex ac...', 'Magna dicta lau...', 'Eum officia est...', 'Sit est qui eaq...', NULL, 'Aute ex sed id ...', 'Quasi sed maxim...', 'Aute qui harum ...', NULL, 'Quod quis lorem...', 'Minus commodo i...', 'Eum perferendis...', NULL, 'Nam nisi quos q...', 'In minus except...', 'Vel sed molesti...', '91', '12', '41', '69')
+#1 {main}
+  thrown in C:\xampp\htdocs\ictddzr805-main\ictddzr805-php-main\api\save_client.php on line 103

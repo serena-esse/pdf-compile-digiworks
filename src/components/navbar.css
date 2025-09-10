@@ -1,0 +1,53 @@
+/* NAVBAR */
+
+.custom-navbar {
+  width: 100%;
+  z-index: 1000;
+  background-color: #f2f2f2;
+}
+
+.custom-navbar.fixed-top {
+  position: fixed;
+  width: 100%;
+  z-index: 1000;
+  background-color: #f2f2f2;
+}
+
+.nav-link-custom {
+  color: #000; /* Imposta il colore del testo */
+  transition: color 0.3s ease-in-out;
+  display: flex;
+  align-items: center;
+  justify-content: center; /* Centra il testo verticalmente */
+}
+
+.nav-link-custom:hover {
+  color: #032924;
+}
+
+.nav-link-custom:active,
+.nav-link-custom.active {
+  color: #032924;
+}
+
+.nav-link-custom img {
+  transition: filter 0.3s ease-in-out;
+}
+
+.nav-link-custom img:hover {
+  filter: brightness(0.9);
+}
+
+/* Modal custom style */
+.custom-modal .modal-content {
+  background-color: #f2f2f2;
+}
+
+.modal-body .nav-link {
+  color: #2f7c72;
+  transition: color 0.3s ease-in-out;
+}
+
+.modal-body .nav-link:hover {
+  color: #032924;
+}

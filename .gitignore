@@ -1,0 +1,10 @@
+node_modules/
+build/
+dist/
+.cache/
+.env
+.env.*
+!.env.example
+npm-debug.log*
+yarn-*.log*
+.DS_Store

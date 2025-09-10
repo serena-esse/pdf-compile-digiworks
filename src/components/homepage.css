@@ -1,0 +1,103 @@
+.home-page {
+  font-family: Arial, sans-serif;
+  background-color: #f4f4f4;
+  min-height: 100vh;
+  padding-top: 20px;
+  text-align: center;
+}
+
+.home-header {
+  background-image: url("../assets/home-page/sfondo-home_page.png");
+  background-size: cover;
+  background-position: center;
+  padding: 250px 0;
+  margin: 60px 0;
+}
+
+@media (max-width: 768px) {
+  .home-header {
+    padding: 200px 0;
+  }
+}
+
+@media (max-width: 480px) {
+  .home-header {
+    padding: 150px 0;
+  }
+}
+
+.info-text {
+  font-size: 1.2em;
+  color: #555;
+  margin-bottom: 20px;
+  background-color: #e9ecef;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.section-title {
+  font-family: "Montserrat", sans-serif;
+  color: #2f7c72;
+  font-weight: bold;
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.client-item {
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  padding: 10px;
+  transition: background-color 0.3s ease;
+}
+
+.client-item:hover {
+  background-color: #f0f0f0;
+  color: #000;
+}
+
+.practice-button {
+  border: 1px solid #0c6ffb;
+  color: #0c6ffb;
+  background-color: transparent;
+  transition: background-color 0.3s, color 0.3s;
+}
+
+.practice-button:hover,
+.practice-button.active-practice {
+  background-color: #0a5ec4;
+  color: #fff;
+}
+
+.area-clienti {
+  background-image: url("https://images.pexels.com/photos/3183197/pexels-photo-3183197.jpeg");
+  background-size: cover;
+  background-position: center;
+  padding: 60px;
+  border-radius: 8px;
+  color: white;
+  text-align: center;
+  height: 300px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.overlay {
+  background: rgba(0, 0, 0, 0.5);
+  padding: 20px;
+  border-radius: 8px;
+}
+
+@media (max-width: 1443px) {
+  #top {
+    margin-top: 324px;
+  }
+}
+
+@media (max-width: 480px) {
+  #top {
+    margin-top: 29px;
+  }
+}
