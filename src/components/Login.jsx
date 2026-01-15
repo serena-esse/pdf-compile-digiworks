@@ -9,6 +9,12 @@ const LoginForm = () => {
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
 
+  // ✅ Base URL API:
+  // - in dev puoi mettere REACT_APP_API_URL in .env.development
+  // - fallback: XAMPP locale
+  const API_BASE =
+    process.env.REACT_APP_API_URL || "http://localhost:8080/backend";
+
   const handleLogin = () => {
     const data = {
       action: "login",
@@ -16,32 +22,30 @@ const LoginForm = () => {
       password: password,
     };
 
-    fetch("https://pdf.digiworks.it/backend/login.php", {
+    fetch(`${API_BASE}/login.php`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
+      credentials: "include", // ✅ utile se usi sessioni PHP
       body: JSON.stringify(data),
     })
       .then((response) => response.json())
       .then((data) => {
         if (data.success) {
           console.log("Login avvenuto con successo!");
-          // Salva l'ID dell'utente nel local storage
 
+          // Salva l'ID dell'utente nel local storage
           localStorage.setItem("userId", data.user_id);
 
           // Reindirizza l'utente alla home
           navigate("/homepage");
         } else {
           console.error("Errore durante il login:", data.error);
-          // Gestisci gli errori di login, ad esempio, mostrare un messaggio di errore all'utente
         }
       })
-
       .catch((error) => {
         console.error("Errore durante il login:", error);
-        // Gestisci altri errori, ad esempio, problemi di connessione
       });
   };
 
@@ -56,6 +60,7 @@ const LoginForm = () => {
                 <div className="row justify-content-center align-items-center">
                   <div className="col-12 text-center form-container">
                     <h2 className="custom-welcome-text mb-5">Welcome!</h2>
+
                     <div className="mb-4">
                       <label htmlFor="utente">
                         <input
@@ -67,6 +72,7 @@ const LoginForm = () => {
                         />
                       </label>
                     </div>
+
                     <div className="mb-4">
                       <label htmlFor="password">
                         <input
@@ -78,6 +84,7 @@ const LoginForm = () => {
                         />
                       </label>
                     </div>
+
                     <div className="mt-4 d-flex justify-content-center">
                       <button
                         onClick={handleLogin}
@@ -85,6 +92,7 @@ const LoginForm = () => {
                       >
                         Accedi
                       </button>
+
                       <Link
                         to="/"
                         className="custom-button px-3 py-2"
@@ -93,6 +101,7 @@ const LoginForm = () => {
                         Registrati
                       </Link>
                     </div>
+
                     <div className="additional-info mt-3">
                       {/* per inserire in futuro recupera password */}
                       {/* <p>

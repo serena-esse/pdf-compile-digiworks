@@ -8,3 +8,5 @@ dist/
 npm-debug.log*
 yarn-*.log*
 .DS_Store
+backend/config.local.php
+

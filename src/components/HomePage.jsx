@@ -145,7 +145,18 @@ const HomePage = () => {
                         ) : (
                           <FaRegSquare className="me-2" />
                         )}
-                        {client.nome} {client.cognome}
+                        <div className="d-flex flex-column">
+  <strong>
+    {client.nome} {client.cognome}
+  </strong>
+
+  <small className="text-muted">
+    {client.ragione_sociale && client.ragione_sociale.trim() !== ""
+      ? client.ragione_sociale
+      : "Privato"}
+  </small>
+</div>
+
                       </div>
 
                       {/* Pulsanti "Info" e "Elimina" */}
