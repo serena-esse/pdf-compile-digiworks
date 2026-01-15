@@ -7,6 +7,7 @@ import {
   FaRegSquare,
   FaInfoCircle,
   FaTrash,
+  FaCopy,
 } from "react-icons/fa";
 
 const HomePage = () => {
@@ -14,9 +15,13 @@ const HomePage = () => {
   const [selectedClient, setSelectedClient] = useState(null);
   const navigate = useNavigate();
 
-  // **Carica la lista clienti dal database**
+  // ✅ Base URL (DEV + PROD)
+  const API_BASE =
+    process.env.REACT_APP_API_URL || "http://localhost:8080/backend";
+
+  // ✅ Carica lista clienti
   useEffect(() => {
-    fetch("https://pdf.digiworks.it/backend/api/get_client.php")
+    fetch(`${API_BASE}/api/get_client.php`, { credentials: "include" })
       .then((response) => {
         if (!response.ok) {
           throw new Error(`Errore HTTP: ${response.status}`);
@@ -24,7 +29,7 @@ const HomePage = () => {
         return response.json();
       })
       .then((data) => {
-        console.log("📥 Dati ricevuti:", data); // DEBUG: Guarda i dati in console
+        console.log("📥 Dati ricevuti:", data);
         if (data && Array.isArray(data.clienti)) {
           setClients(data.clienti);
         } else {
@@ -32,17 +37,17 @@ const HomePage = () => {
             "⚠️ La risposta dell'API non contiene un array valido di clienti:",
             data
           );
+          setClients([]);
         }
       })
-      .catch((error) =>
-        console.error("❌ Errore nel recupero dei clienti:", error)
-      );
-  }, []);
+      .catch((error) => {
+        console.error("❌ Errore nel recupero dei clienti:", error);
+        setClients([]);
+      });
+  }, [API_BASE]);
 
   const handleClientClick = (client) => {
-    setSelectedClient(
-      selectedClient && selectedClient.id === client.id ? null : client
-    );
+    setSelectedClient((prev) => (prev && prev.id === client.id ? null : client));
   };
 
   const handleMoreInfoClick = (e, client) => {
@@ -51,33 +56,54 @@ const HomePage = () => {
   };
 
   const handleDeleteClient = async (clientId) => {
-    if (
-      !window.confirm(
-        `Sei sicuro di voler eliminare il cliente con ID: ${clientId}?`
-      )
-    ) {
+    if (!window.confirm(`Sei sicuro di voler eliminare il cliente con ID: ${clientId}?`)) {
       return;
     }
 
     try {
-      const response = await fetch(
-        "https://pdf.digiworks.it/backend/api/delete_client.php",
-        {
-          method: "DELETE",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ id: clientId }),
-        }
-      );
+      const response = await fetch(`${API_BASE}/api/delete_client.php`, {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: clientId }),
+        credentials: "include",
+      });
 
       const result = await response.json();
+
       if (result.status === "success") {
-        setClients(clients.filter((client) => client.id !== clientId));
-        setSelectedClient(null);
+        setClients((prev) => prev.filter((client) => client.id !== clientId));
+        setSelectedClient((prev) => (prev?.id === clientId ? null : prev));
       } else {
         console.error("Errore eliminazione cliente:", result.message);
+        alert(result.message || "Errore durante l'eliminazione.");
       }
     } catch (error) {
       console.error("Errore di rete:", error);
+      alert("Errore di rete durante l'eliminazione.");
+    }
+  };
+
+  const handleDuplicateClient = async (clientId) => {
+    try {
+      const response = await fetch(`${API_BASE}/api/duplicate_client.php`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: clientId }),
+        credentials: "include",
+      });
+
+      const result = await response.json();
+
+      if (result.status === "success" && result.client) {
+        setClients((prev) => [result.client, ...prev]);
+        setSelectedClient(result.client);
+      } else {
+        console.error("Errore duplicazione:", result.message);
+        alert(result.message || "Errore durante la duplicazione.");
+      }
+    } catch (error) {
+      console.error("Errore di rete:", error);
+      alert("Errore di rete durante la duplicazione.");
     }
   };
 
@@ -85,7 +111,7 @@ const HomePage = () => {
     <>
       <Navbar2 />
       <div className="home-page" style={{ fontFamily: "Arial, sans-serif" }}>
-        <header className="home-header custom-color text-white modern-font"></header>
+        <header className="home-header custom-color text-white modern-font" />
 
         <Container>
           {/* Introduzione */}
@@ -100,7 +126,7 @@ const HomePage = () => {
             </Col>
           </Row>
 
-          {/* Pulsante "Carica" per aggiungere un nuovo cliente */}
+          {/* Carica nuovo cliente */}
           <Row className="my-5">
             <Col>
               <div className="area-clienti position-relative text-center">
@@ -116,21 +142,20 @@ const HomePage = () => {
             </Col>
           </Row>
 
-          {/* Lista clienti e lista pratiche */}
+          {/* Lista clienti + pratiche */}
           <Row className="my-5">
             <Col md={6}>
               <div className="p-3 shadow-sm">
                 <h2 className="section-title">Lista Clienti</h2>
 
-                {/* Messaggio se non ci sono clienti */}
                 {clients.length === 0 && (
                   <Alert variant="warning">Nessun cliente disponibile.</Alert>
                 )}
 
                 <ListGroup id="my-list-group">
-                  {clients.map((client, index) => (
+                  {clients.map((client) => (
                     <ListGroup.Item
-                      key={index}
+                      key={client.id}
                       action
                       onClick={() => handleClientClick(client)}
                       className={`client-item d-flex justify-content-between align-items-center ${
@@ -145,29 +170,44 @@ const HomePage = () => {
                         ) : (
                           <FaRegSquare className="me-2" />
                         )}
+
                         <div className="d-flex flex-column">
-  <strong>
-    {client.nome} {client.cognome}
-  </strong>
+                          <strong>
+                            {client.nome} {client.cognome}
+                          </strong>
 
-  <small className="text-muted">
-    {client.ragione_sociale && client.ragione_sociale.trim() !== ""
-      ? client.ragione_sociale
-      : "Privato"}
-  </small>
-</div>
-
+                          <small className="text-muted">
+                            {client.ragione_sociale &&
+                            client.ragione_sociale.trim() !== ""
+                              ? client.ragione_sociale
+                              : "Privato"}
+                          </small>
+                        </div>
                       </div>
 
-                      {/* Pulsanti "Info" e "Elimina" */}
+                      {/* Pulsanti */}
                       <div className="d-flex">
                         <Button
                           variant="info"
                           size="sm"
                           className="me-2"
                           onClick={(e) => handleMoreInfoClick(e, client)}
+                          title="Dettagli"
                         >
                           <FaInfoCircle />
+                        </Button>
+
+                        <Button
+                          variant="secondary"
+                          size="sm"
+                          className="me-2"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDuplicateClient(client.id);
+                          }}
+                          title="Duplica"
+                        >
+                          <FaCopy />
                         </Button>
 
                         <Button
@@ -177,6 +217,7 @@ const HomePage = () => {
                             e.stopPropagation();
                             handleDeleteClient(client.id);
                           }}
+                          title="Elimina"
                         >
                           <FaTrash />
                         </Button>
@@ -187,19 +228,23 @@ const HomePage = () => {
               </div>
             </Col>
 
-            {/* Lista pratiche */}
             <Col md={6}>
               <div className="p-3 shadow-sm">
                 <h2 className="section-title">Lista Pratiche</h2>
                 <div className="d-flex flex-wrap justify-content-center">
-                  {/* Pulsante per la pratica REVOIP */}
                   <Button
                     variant="outline-success"
                     className="m-2 practice-button"
+                    disabled={!selectedClient}
                     onClick={() =>
                       navigate("/revoip", { state: { client: selectedClient } })
                     }
                     style={{ minWidth: "120px" }}
+                    title={
+                      selectedClient
+                        ? "Apri pratica ReVoip"
+                        : "Seleziona prima un cliente"
+                    }
                   >
                     ReVoip PDF
                   </Button>

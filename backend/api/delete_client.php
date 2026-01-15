@@ -1,53 +1,85 @@
 <?php
-header("Content-Type: application/json");
-header("Access-Control-Allow-Origin: *");
-header("Access-Control-Allow-Methods: DELETE");
+session_start();
+
+/** CORS (DEV + PROD) */
+$allowed_origins = [
+  'https://pdf.digiworks.it',
+  'http://localhost:3000',
+  'http://127.0.0.1:3000',
+  'http://localhost:5173',
+  'http://127.0.0.1:5173',
+];
+
+$origin = $_SERVER['HTTP_ORIGIN'] ?? '';
+if ($origin && in_array($origin, $allowed_origins, true)) {
+  header("Access-Control-Allow-Origin: $origin");
+  header("Vary: Origin");
+}
+
+header("Access-Control-Allow-Credentials: true");
+header("Access-Control-Allow-Methods: DELETE, OPTIONS");
 header("Access-Control-Allow-Headers: Content-Type");
+header("Content-Type: application/json; charset=UTF-8");
 
-// Gestione della richiesta preflight (CORS)
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
-    http_response_code(200);
-    exit();
+  http_response_code(204);
+  exit;
 }
 
-// Connessione al database
-$servername = "ictddzr805.mysql.db";
-$username = "ictddzr805";
-$password = "sj8JqSxCv5sH";
-$dbname = "ictddzr805";
-
-$conn = new mysqli($servername, $username, $password, $dbname);
-
-if ($conn->connect_error) {
-    die(json_encode(["status" => "error", "message" => "Errore connessione DB: " . $conn->connect_error]));
+function loadDbConfig(): array {
+  $local = __DIR__ . '/../config.local.php';
+  $prod  = __DIR__ . '/../config.prod.php';
+  if (file_exists($local)) return require $local;
+  return require $prod;
 }
 
-// Controlla se il metodo della richiesta è DELETE
-if ($_SERVER['REQUEST_METHOD'] !== 'DELETE') {
-    echo json_encode(["status" => "error", "message" => "Metodo di richiesta non valido. Usa DELETE."]);
-    exit();
+function connectDB(): PDO {
+  $cfg = loadDbConfig();
+
+  $host = $cfg['host'];
+  $db   = $cfg['db'];
+  $user = $cfg['user'];
+  $pass = $cfg['pass'];
+  $port = $cfg['port'] ?? 3306;
+  $charset = $cfg['charset'] ?? 'utf8mb4';
+
+  $dsn = "mysql:host={$host};port={$port};dbname={$db};charset={$charset}";
+  $options = [
+    PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
+    PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+    PDO::ATTR_EMULATE_PREPARES   => false,
+  ];
+
+  return new PDO($dsn, $user, $pass, $options);
 }
 
-// Ottieni i dati JSON
-$data = json_decode(file_get_contents('php://input'), true);
+try {
+  if ($_SERVER['REQUEST_METHOD'] !== 'DELETE') {
+    http_response_code(405);
+    echo json_encode(["status" => "error", "message" => "Metodo non valido. Usa DELETE."]);
+    exit;
+  }
 
-if (!isset($data['id'])) {
-    echo json_encode(["status" => "error", "message" => "ID cliente non fornito"]);
-    exit();
-}
+  $data = json_decode(file_get_contents('php://input'), true);
+  $id = $data['id'] ?? null;
 
-$id = intval($data['id']);
+  if (!$id || !ctype_digit((string)$id)) {
+    http_response_code(400);
+    echo json_encode(["status" => "error", "message" => "ID cliente non valido"]);
+    exit;
+  }
 
-// Esegui la query di eliminazione
-$stmt = $conn->prepare("DELETE FROM clienti WHERE id = ?");
-$stmt->bind_param("i", $id);
+  $pdo = connectDB();
 
-if ($stmt->execute()) {
+  $stmt = $pdo->prepare("DELETE FROM `clienti` WHERE `id` = :id");
+  $stmt->execute(['id' => (int)$id]);
+
+  if ($stmt->rowCount() > 0) {
     echo json_encode(["status" => "success", "message" => "Cliente eliminato con successo"]);
-} else {
-    echo json_encode(["status" => "error", "message" => "Errore eliminazione: " . $stmt->error]);
+  } else {
+    echo json_encode(["status" => "error", "message" => "Cliente non trovato"]);
+  }
+} catch (Exception $e) {
+  http_response_code(500);
+  echo json_encode(["status" => "error", "message" => "Errore server"]);
 }
-
-$stmt->close();
-$conn->close();
-?>

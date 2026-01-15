@@ -1,105 +1,146 @@
 <?php
-// ✅ Debugging e CORS
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
-error_reporting(E_ALL);
-header("Access-Control-Allow-Origin: http://localhost:3000");
-header("Access-Control-Allow-Methods: POST, OPTIONS");
-header("Access-Control-Allow-Headers: Content-Type, Authorization");
+session_start();
 
-// ✅ Gestisci richieste OPTIONS (Preflight)
-if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
-    http_response_code(200);
-    exit();
-}
-
-// ✅ Connessione al database
-$servername = "ictddzr805.mysql.db";
-$username = "ictddzr805";
-$password = "sj8JqSxCv5sH";
-$dbname = "ictddzr805";
-
-$conn = new mysqli($servername, $username, $password, $dbname);
-if ($conn->connect_error) {
-    error_log("🔴 Errore connessione DB: " . $conn->connect_error);
-    echo json_encode(["status" => "error", "message" => "Errore connessione DB"]);
-    exit();
-}
-
-// ✅ Controllo richiesta POST
-if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    echo json_encode(["status" => "error", "message" => "Metodo non valido. Usa POST."]);
-    exit();
-}
-
-// ✅ Leggi JSON in ingresso
-$json = file_get_contents('php://input');
-$data = json_decode($json, true);
-
-if (!$data) {
-    echo json_encode(["status" => "error", "message" => "Formato JSON non valido.", "data" => $json]);
-    exit();
-}
-
-// ✅ Controllo campi obbligatori
-$campi_obbligatori = ['nome', 'cognome', 'email', 'data_nascita', 'codice_fiscale'];
-foreach ($campi_obbligatori as $campo) {
-    if (empty($data[$campo])) {
-        echo json_encode(["status" => "error", "message" => "Il campo '$campo' è obbligatorio."]);
-        exit();
-    }
-}
-
-// ✅ Normalizza i dati (35 colonne, id escluso)
-$campi = [
-    "nome", "cognome", "data_nascita", "indirizzo", "codice_fiscale", "email", "telefono",
-    "località", "Provincia", "luogo_di_nascita", "cap", "data_pratica", "ragione_sociale",
-    "sdi_pec", "numero_carta_identita", "numero_da_migrare1", "codice_di_migrazione1", "Operatore_Cedente1", "tipologia1",
-    "numero_da_migrare2", "codice_di_migrazione2", "Operatore_Cedente2", "tipologia2",
-    "numero_da_migrare3", "codice_di_migrazione3", "Operatore_Cedente3", "tipologia3",
-    "note", "luogo_pratica", "rilasciato_da", "n_revoip1000", "n_revoipchagg", "costo_attivazione", "canone_mensile"
+/** CORS (DEV + PROD) */
+$allowed_origins = [
+  'https://pdf.digiworks.it',
+  'http://localhost:3000',
+  'http://127.0.0.1:3000',
+  'http://localhost:5173',
+  'http://127.0.0.1:5173',
 ];
 
-// ✅ Prepara i valori da inserire
-$valori = [];
-foreach ($campi as $campo) {
-    $valori[] = isset($data[$campo]) && $data[$campo] !== "" ? $data[$campo] : null;
+$origin = $_SERVER['HTTP_ORIGIN'] ?? '';
+if ($origin && in_array($origin, $allowed_origins, true)) {
+  header("Access-Control-Allow-Origin: $origin");
+  header("Vary: Origin");
+}
+header("Access-Control-Allow-Credentials: true");
+header("Access-Control-Allow-Methods: POST, OPTIONS");
+header("Access-Control-Allow-Headers: Content-Type");
+header("Content-Type: application/json; charset=UTF-8");
+
+if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+  http_response_code(204);
+  exit;
 }
 
-// ✅ Query SQL (34 `?` perché `id` è AUTO_INCREMENT)
-$query = "
-    INSERT INTO clienti (
-        nome, cognome, data_nascita, indirizzo, codice_fiscale, email, telefono,
-        località, Provincia, luogo_di_nascita, cap, data_pratica, ragione_sociale, 
-        sdi_pec, numero_carta_identita, numero_da_migrare1, codice_di_migrazione1, Operatore_Cedente1, tipologia1,
-        numero_da_migrare2, codice_di_migrazione2, Operatore_Cedente2, tipologia2,
-        numero_da_migrare3, codice_di_migrazione3, Operatore_Cedente3, tipologia3,
-        note, luogo_pratica, rilasciato_da, n_revoip1000, n_revoipchagg, costo_attivazione, canone_mensile
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-";
-
-// ✅ Preparazione query
-$stmt = $conn->prepare($query);
-if (!$stmt) {
-    echo json_encode(["status" => "error", "message" => "Errore preparazione query: " . $conn->error]);
-    exit();
+function loadDbConfig(): array {
+  $local = __DIR__ . '/../config.local.php';
+  $prod  = __DIR__ . '/../config.prod.php';
+  if (file_exists($local)) return require $local;
+  return require $prod;
 }
 
-// ✅ Creare la stringa dei tipi CORRETTA (34 tipi, deve corrispondere ai parametri)
-$tipi = "ssssssssssssssssssssssssssssssiidd";
-$stmt->bind_param($tipi, ...$valori);
-
-
-
-
-// ✅ Eseguire la query
-if ($stmt->execute()) {
-    echo json_encode(["status" => "success", "message" => "Dati salvati con successo."]);
-} else {
-    echo json_encode(["status" => "error", "message" => "Errore SQL: " . $stmt->error]);
+function connectDB(): PDO {
+  $cfg = loadDbConfig();
+  $dsn = "mysql:host={$cfg['host']};port=" . ($cfg['port'] ?? 3306) . ";dbname={$cfg['db']};charset=" . ($cfg['charset'] ?? 'utf8mb4');
+  return new PDO($dsn, $cfg['user'], $cfg['pass'], [
+    PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+    PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+    PDO::ATTR_EMULATE_PREPARES => false,
+  ]);
 }
 
-// ✅ Chiudi connessione
-$stmt->close();
-$conn->close();
-?>
+try {
+  if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+    http_response_code(405);
+    echo json_encode(["status" => "error", "message" => "Metodo non valido. Usa POST."]);
+    exit;
+  }
+
+  $data = json_decode(file_get_contents('php://input'), true);
+  if (!is_array($data)) {
+    http_response_code(400);
+    echo json_encode(["status" => "error", "message" => "Formato JSON non valido."]);
+    exit;
+  }
+
+  // id opzionale (se presente -> UPDATE)
+  $id = $data['id'] ?? null;
+  if ($id !== null && !ctype_digit((string)$id)) {
+    http_response_code(400);
+    echo json_encode(["status" => "error", "message" => "ID non valido"]);
+    exit;
+  }
+
+  // obbligatori
+  foreach (['nome', 'cognome', 'data_nascita', 'codice_fiscale'] as $campo) {
+    if (empty($data[$campo])) {
+      http_response_code(400);
+      echo json_encode(["status" => "error", "message" => "Il campo '$campo' è obbligatorio."]);
+      exit;
+    }
+  }
+
+  // campi reali della tabella
+  $fields = [
+    "nome", "cognome", "data_nascita", "indirizzo", "codice_fiscale",
+    "email", "telefono", "località", "Provincia", "luogo_di_nascita",
+    "cap", "data_pratica", "ragione_sociale", "sdi_pec", "numero_carta_identita",
+    "numero_da_migrare1", "codice_di_migrazione1", "Operatore_Cedente1", "tipologia1",
+    "numero_da_migrare2", "codice_di_migrazione2", "Operatore_Cedente2", "tipologia2",
+    "numero_da_migrare3", "codice_di_migrazione3", "Operatore_Cedente3", "tipologia3",
+    "note", "luogo_pratica", "rilasciato_da",
+    "n_revoip1000", "n_revoipchagg", "costo_attivazione", "canone_mensile"
+  ];
+
+  // normalizza ("" -> NULL)
+  $payload = [];
+  foreach ($fields as $f) {
+    $payload[$f] = (isset($data[$f]) && $data[$f] !== "") ? $data[$f] : null;
+  }
+
+  $pdo = connectDB();
+
+  // Se UPDATE: controlla che il cliente esista
+  if ($id !== null) {
+    $chk = $pdo->prepare("SELECT 1 FROM `clienti` WHERE `id` = :id");
+    $chk->execute(['id' => (int)$id]);
+    if (!$chk->fetchColumn()) {
+      echo json_encode(["status" => "error", "message" => "Cliente non trovato"]);
+      exit;
+    }
+
+    // Se cambio CF, deve restare unico
+    $chkCf = $pdo->prepare("SELECT 1 FROM `clienti` WHERE `codice_fiscale` = :cf AND `id` <> :id");
+    $chkCf->execute(['cf' => $payload['codice_fiscale'], 'id' => (int)$id]);
+    if ($chkCf->fetchColumn()) {
+      echo json_encode(["status" => "error", "message" => "Codice fiscale già presente"]);
+      exit;
+    }
+
+    // UPDATE
+    $set = [];
+    foreach ($fields as $f) {
+      $set[] = "`$f` = :$f";
+    }
+
+    $sql = "UPDATE `clienti` SET " . implode(", ", $set) . " WHERE `id` = :id";
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute(array_merge($payload, ['id' => (int)$id]));
+
+    echo json_encode(["status" => "success", "message" => "Cliente aggiornato", "id" => (int)$id]);
+    exit;
+  }
+
+  // INSERT: CF deve essere unico
+  $chkCf = $pdo->prepare("SELECT 1 FROM `clienti` WHERE `codice_fiscale` = :cf");
+  $chkCf->execute(['cf' => $payload['codice_fiscale']]);
+  if ($chkCf->fetchColumn()) {
+    echo json_encode(["status" => "error", "message" => "Codice fiscale già presente"]);
+    exit;
+  }
+
+  $cols = implode(", ", array_map(fn($f) => "`$f`", $fields));
+  $vals = implode(", ", array_map(fn($f) => ":$f", $fields));
+  $sql = "INSERT INTO `clienti` ($cols) VALUES ($vals)";
+  $stmt = $pdo->prepare($sql);
+  $stmt->execute($payload);
+
+  $newId = (int)$pdo->lastInsertId();
+  echo json_encode(["status" => "success", "message" => "Cliente creato", "id" => $newId]);
+} catch (Exception $e) {
+  http_response_code(500);
+  echo json_encode(["status" => "error", "message" => "Errore server", "debug" => $e->getMessage()]);
+}
