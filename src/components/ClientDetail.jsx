@@ -7,7 +7,8 @@ import Navbar2 from "./Navbar2";
 // - CRA: usa REACT_APP_API_BASE
 // - fallback: locale xampp
 const API_BASE =
-  process.env.REACT_APP_API_BASE || "http://localhost:8080/backend";
+  process.env.REACT_APP_API_URL || "https://pdf.digiworks.it/backend";
+
 
 const ClientDetail = () => {
   const location = useLocation();

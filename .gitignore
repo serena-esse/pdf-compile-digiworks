@@ -1,12 +1,25 @@
+# Node / React
 node_modules/
 build/
 dist/
 .cache/
+
+# Env
 .env
 .env.*
 !.env.example
+
+# Logs
 npm-debug.log*
 yarn-*.log*
-.DS_Store
-backend/config.local.php
 
+# OS
+.DS_Store
+Thumbs.db
+
+# Backend config (SICUREZZA)
+backend/config.local.php
+backend/config.prod.php
+
+# Database
+*.sql

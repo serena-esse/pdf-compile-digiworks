@@ -114,12 +114,16 @@ try {
   $params = ["id" => $id];
 
   foreach ($fields as $f) {
-    if (array_key_exists($f, $data)) {
-      $set[] = "`$f` = :$f";
-      $v = $data[$f];
-      $params[$f] = ($v === "" ? null : $v);
-    }
+  if (array_key_exists($f, $data)) {
+    // nome parametro sicuro (niente accenti / simboli)
+    $p = preg_replace('/[^a-zA-Z0-9_]/', '_', $f);
+
+    $set[] = "`$f` = :$p";
+
+    $v = $data[$f];
+    $params[$p] = ($v === "" ? null : $v);
   }
+}
 
   if (!$set) {
     http_response_code(400);
